@@ -1,0 +1,54 @@
+# Ignore build directories
+build/
+/lib/
+
+# Ignore everything in bin/
+bin/*
+# Except the executable file:
+!bin/*.exe
+
+
+# CMake generated files
+CMakeCache.txt
+CMakeFiles/
+CMakeScripts/
+CTestTestfile.cmake
+cmake_install.cmake
+Makefile
+compile_commands.json
+
+# IDEs and editors
+.vscode/
+.idea/
+*.sln
+*.vcxproj*
+*.user
+*.filters
+
+# OS-specific files
+.DS_Store
+Thumbs.db
+
+# Temporary files
+.cache/
+*.log
+*.tmp
+*.swp
+*~
+
+# Other common artifacts
+*.o
+*.obj
+*.so
+*.dll
+*.dylib
+*.exe
+
+# Test output and coverage files
+coverage/
+*.gcov
+*.gcda
+*.gcno
+
+# Development tools:
+build.sh
