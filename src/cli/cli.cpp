@@ -42,7 +42,7 @@ bool CLI::start() {
     return INPUT_FAILED;
   }
 
-  QuadtreeImage img(userImage, thresholdInput, 1 * 1, errorMethod);
+  QuadtreeImage img(userImage, thresholdInput, 4 * 4, errorMethod);
   if (!img.build()) {
     std::cerr << "Error: Building Quadtree Failed!\n";
     return INPUT_FAILED;
@@ -52,7 +52,7 @@ bool CLI::start() {
   std::cout << "Enter output file path: ";
   std::cin >> outputPath;
 
-  Image resultImage = img.transform();
+  Image resultImage = img.apply();
   resultImage.save(outputPath);
 
   return INPUT_SUCCESS;

@@ -14,9 +14,6 @@ private:
 
   QuadtreeNode *mRoot;
 
-  void buildNode(QuadtreeNode *node);
-  void transformNode(QuadtreeNode *node, Image &image);
-
 public:
   QuadtreeImage(const Image &image, float threshold, int minBlockSize,
                 ErrorMethod *errorMethod);
@@ -24,7 +21,7 @@ public:
 
   bool build();
 
-  Image transform();
+  Image apply();
 
   void clear();
 

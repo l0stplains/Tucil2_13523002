@@ -10,22 +10,10 @@ QuadtreeImage::QuadtreeImage(const Image &image, float threshold,
 QuadtreeImage::~QuadtreeImage() { clear(); }
 
 bool QuadtreeImage::build() {
+  DEBUG_TIMER("Building tree");
   mRoot = new QuadtreeNode(0, 0, mImage.getWidth(), mImage.getHeight());
-  buildNode(mRoot);
-  return (mRoot != nullptr);
-}
-
-void QuadtreeImage::clear() {
-  if (mRoot) {
-    delete mRoot;
-    mRoot = nullptr;
-  }
-}
-
-void QuadtreeImage::buildNode(QuadtreeNode *node) {
-  DEBUG_TIMER("Building Node");
   std::stack<QuadtreeNode *> nodeStack;
-  nodeStack.push(node);
+  nodeStack.push(mRoot);
 
   while (!nodeStack.empty()) {
     QuadtreeNode *node = nodeStack.top();
@@ -52,18 +40,16 @@ void QuadtreeImage::buildNode(QuadtreeNode *node) {
       }
     }
   }
+
+  return (mRoot != nullptr);
 }
 
-Image QuadtreeImage::transform() {
+Image QuadtreeImage::apply() {
+  DEBUG_TIMER("Applying tree to image");
   Image resultImage(mImage);
-  transformNode(mRoot, resultImage);
-  return resultImage;
-}
 
-void QuadtreeImage::transformNode(QuadtreeNode *node, Image &image) {
-  DEBUG_TIMER("Transforming Node");
   std::stack<QuadtreeNode *> nodeStack;
-  nodeStack.push(node);
+  nodeStack.push(mRoot);
 
   while (!nodeStack.empty()) {
     QuadtreeNode *node = nodeStack.top();
@@ -71,6 +57,7 @@ void QuadtreeImage::transformNode(QuadtreeNode *node, Image &image) {
 
     if (!node->mIsDivided) {
       int area = node->mWidth * node->mHeight;
+
       unsigned char avgR = static_cast<unsigned char>(
           mImage.getChannelBlockSum(node->mPosX, node->mPosY, node->mWidth,
                                     node->mHeight, 0) /
@@ -83,11 +70,13 @@ void QuadtreeImage::transformNode(QuadtreeNode *node, Image &image) {
           mImage.getChannelBlockSum(node->mPosX, node->mPosY, node->mWidth,
                                     node->mHeight, 2) /
           area);
+
       for (int x = node->mPosX; x < node->mPosX + node->mWidth; ++x) {
         for (int y = node->mPosY; y < node->mPosY + node->mHeight; ++y) {
-          image.setColorAt(x, y, avgR, avgG, avgB);
+          resultImage.setColorAt(x, y, avgR, avgG, avgB);
         }
       }
+
     } else {
       for (int i = 0; i < 4; ++i) {
         if (node->mChildren[i] != nullptr) {
@@ -95,5 +84,13 @@ void QuadtreeImage::transformNode(QuadtreeNode *node, Image &image) {
         }
       }
     }
+  }
+  return resultImage;
+}
+
+void QuadtreeImage::clear() {
+  if (mRoot) {
+    delete mRoot;
+    mRoot = nullptr;
   }
 }
