@@ -1,36 +1,34 @@
 #ifndef QUADTREEIMAGE_H
 #define QUADTREEIMAGE_H
 
+#include "error_measurement/error_method.h"
 #include "image/image.h"
 #include "quadtreenode.h"
 
-enum class ErrorMethod {
-  MEAN,
-  SDV,
-  SSIM,
-};
-
 class QuadtreeImage {
-public:
-  QuadtreeImage(const Image &image, float threshold, int minBlockSize,
-                ErrorMethod errorMethod);
-  ~QuadtreeImage();
-
-  bool build();
-
-  void clear();
-
-  QuadtreeNode *getRoot() const { return mRoot; }
-
 private:
   const Image &mImage;
   float mThreshold;
   int mMinBlockSize;
-  ErrorMethod mErrorMethod;
+  ErrorMethod *mErrorMethod;
 
   QuadtreeNode *mRoot;
 
-  QuadtreeNode *buildNode(int x, int y, int width, int height);
+  void buildNode(QuadtreeNode *node);
+  void transformNode(QuadtreeNode *node, Image &image);
+
+public:
+  QuadtreeImage(const Image &image, float threshold, int minBlockSize,
+                ErrorMethod *errorMethod);
+  ~QuadtreeImage();
+
+  bool build();
+
+  Image transform();
+
+  void clear();
+
+  QuadtreeNode *getRoot() const { return mRoot; }
 };
 
 #endif

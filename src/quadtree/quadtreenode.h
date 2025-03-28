@@ -28,17 +28,18 @@ public:
 
     int halfWidth = mWidth / 2;
     int halfHeight = mHeight / 2;
-
-    mChildren[0] =
-        new QuadtreeNode(mPosX + halfWidth, mPosY, mWidth - halfWidth,
-                         mHeight); // first quadran
-    mChildren[1] =
-        new QuadtreeNode(mPosX, mPosY, halfWidth, halfHeight); // second quadran
+    // first quadrant
+    mChildren[0] = new QuadtreeNode(mPosX + halfWidth, mPosY,
+                                    mWidth - halfWidth, halfHeight);
+    // second quadrant
+    mChildren[1] = new QuadtreeNode(mPosX, mPosY, halfWidth, halfHeight);
+    // third quadran
     mChildren[2] = new QuadtreeNode(mPosX, mPosY + halfHeight, halfWidth,
-                                    mHeight - halfHeight); // third quadran
+                                    mHeight - halfHeight);
+    // fourth quadran
     mChildren[3] = new QuadtreeNode(mPosX + halfWidth, mPosY + halfHeight,
-                                    mWidth - halfWidth,
-                                    mHeight - halfHeight); // fourth quadran
+                                    mWidth - halfWidth, mHeight - halfHeight);
+    mIsDivided = true;
   }
 };
 

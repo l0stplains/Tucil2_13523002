@@ -2,11 +2,6 @@
 build/
 /lib/
 
-# Ignore everything in bin/
-bin/*
-# Except the executable file:
-!bin/*.exe
-
 
 # CMake generated files
 CMakeCache.txt
