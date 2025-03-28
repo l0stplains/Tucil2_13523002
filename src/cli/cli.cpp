@@ -48,6 +48,9 @@ bool CLI::start() {
     return INPUT_FAILED;
   }
 
+  std::cout << "Depth: " << img.getDepth()
+            << " Node count: " << img.getNodeCount() << std::endl;
+
   std::string outputPath;
   std::cout << "Enter output file path: ";
   std::cin >> outputPath;

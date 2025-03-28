@@ -12,6 +12,9 @@ private:
   int mMinBlockSize;
   ErrorMethod *mErrorMethod;
 
+  int mDepth;
+  int mNodeCount;
+
   QuadtreeNode *mRoot;
 
 public:
@@ -25,6 +28,8 @@ public:
 
   void clear();
 
+  int getDepth() const { return mDepth; }
+  int getNodeCount() const { return mNodeCount; }
   QuadtreeNode *getRoot() const { return mRoot; }
 };
 
