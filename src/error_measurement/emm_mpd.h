@@ -35,6 +35,12 @@ public:
         minR = std::min(minR, color[0]);
         minG = std::min(minG, color[1]);
         minB = std::min(minB, color[2]);
+
+        // early exit if maximum difference is reached for all channels
+        if (maxR == 255 && minR == 0 && maxG == 255 && minG == 0 &&
+            maxB == 255 && minB == 0) {
+          return 255.0;
+        }
       }
     }
 

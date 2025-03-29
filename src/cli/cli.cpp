@@ -1,4 +1,5 @@
 #include "cli.h"
+#include "error_measurement/emm_entropy.h"
 #include "error_measurement/emm_mad.h"
 #include "error_measurement/emm_mpd.h"
 #include "error_measurement/emm_variance.h"
@@ -34,6 +35,8 @@ bool CLI::start() {
     userImage.computeSummedSquareTable();
   } else if (UEMC == "MPD" || UEMC == "MaximumPixelDifferece") {
     errorMethod = new EMM::MaximumPixelDifference();
+  } else if (UEMC == "ENT" || UEMC == "Entropy") {
+    errorMethod = new EMM::Entropy();
   } else {
     std::cerr << "Error: Error Measurement Method unknown!\n";
     return INPUT_FAILED;
