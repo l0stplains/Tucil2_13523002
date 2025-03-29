@@ -1,4 +1,5 @@
 #include "image.h"
+#include <vector>
 #define STB_IMAGE_IMPLEMENTATION
 #include "stb_image.h"
 #define STB_IMAGE_WRITE_IMPLEMENTATION
@@ -111,9 +112,6 @@ bool Image::load() {
   std::cout << "Loaded image (" << mImageWidth << "x" << mImageHeight
             << ") with " << mChannels << " channels."
             << " File type: " << mFileType << std::endl;
-  computeSummedAreaTable();
-  computeSummedSquareTable();
-
   return false;
 }
 
@@ -220,6 +218,13 @@ std::array<unsigned char, 3> Image::getColorAt(int x, int y) const {
   return color;
 }
 
+unsigned char Image::getAlphaAt(int x, int y) const {
+  if (mChannels == 4) {
+    return mImageData[getIdxAt(x, y, 3)];
+  }
+  return 255;
+}
+
 long long Image::getChannelBlockSum(int x, int y, int width, int height,
                                     int channel) const {
 
@@ -255,4 +260,40 @@ void Image::setColorAt(int x, int y, unsigned char r, unsigned char g,
   mImageData[getIdxAt(x, y, 0)] = r;
   mImageData[getIdxAt(x, y, 1)] = g;
   mImageData[getIdxAt(x, y, 2)] = b;
+}
+
+void Image::setAlphaAt(int x, int y, unsigned char a) {
+  mImageData[getIdxAt(x, y, 3)] = a;
+}
+
+void Image::setBlockColorAt(int startX, int startY, int blockWidth,
+                            int blockHeight, unsigned char r, unsigned char g,
+                            unsigned char b) {
+  if (!mImageData) {
+    return;
+  }
+
+  int endX = std::min(startX + blockWidth, mImageWidth);
+  int endY = std::min(startY + blockHeight, mImageHeight);
+  if (startX < 0 || startY < 0 || startX >= mImageWidth ||
+      startY >= mImageHeight)
+    return;
+
+  int effectiveBlockWidth = endX - startX;
+  int rowSize = effectiveBlockWidth * mChannels;
+  std::vector<unsigned char> rowBuffer(rowSize);
+
+  for (int i = 0; i < effectiveBlockWidth; ++i) {
+    rowBuffer[i * mChannels + 0] = r;
+    rowBuffer[i * mChannels + 1] = g;
+    rowBuffer[i * mChannels + 2] = b;
+    for (int c = 3; c < mChannels; ++c) {
+      rowBuffer[i * mChannels + c] = 255;
+    }
+  }
+
+  for (int y = startY; y < endY; ++y) {
+    unsigned char *rowPtr = mImageData + (y * mImageWidth + startX) * mChannels;
+    std::memcpy(rowPtr, rowBuffer.data(), rowSize);
+  }
 }

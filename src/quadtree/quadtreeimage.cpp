@@ -80,16 +80,24 @@ Image QuadtreeImage::apply() {
       unsigned char avgB = static_cast<unsigned char>(
           mImage.getChannelBlockSum(x, y, w, h, 2) / area);
 
-      for (int i = x; i < x + w; ++i) {
-        for (int j = y; j < y + h; ++j) {
-          resultImage.setColorAt(i, j, avgR, avgG, avgB);
-        }
-      }
+      resultImage.setBlockColorAt(x, y, w, h, avgR, avgG, avgB);
+
     } else {
       for (auto &child : current->mChildren) {
         if (child != nullptr) {
           nodeQueue.push(child);
         }
+      }
+    }
+  }
+
+  // preserve the alpha channel for png
+  // (setBlockColorAt use some optimization to apply color faster but not
+  // maintaining the alpha channel)
+  if (resultImage.getChannels() == 4) {
+    for (int y = 0; y < resultImage.getHeight(); y++) {
+      for (int x = 0; x < resultImage.getWidth(); x++) {
+        resultImage.setAlphaAt(x, y, mImage.getAlphaAt(x, y));
       }
     }
   }
@@ -125,11 +133,8 @@ ImageSequence QuadtreeImage::applyAnimation() {
       unsigned char avgB = static_cast<unsigned char>(
           mImage.getChannelBlockSum(x, y, w, h, 2) / area);
 
-      for (int i = x; i < x + w; ++i) {
-        for (int j = y; j < y + h; ++j) {
-          tempImage.setColorAt(i, j, avgR, avgG, avgB);
-        }
-      }
+      tempImage.setBlockColorAt(x, y, w, h, avgR, avgG, avgB);
+
       for (auto &child : current->mChildren) {
         if (child != nullptr) {
           nodeQueue.push(child);

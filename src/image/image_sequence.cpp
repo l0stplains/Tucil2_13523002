@@ -49,11 +49,16 @@ bool ImageSequence::save(const std::string &output_path) const {
         throw std::runtime_error("All images must have identical dimensions");
       }
 
-      // Convert to 4-channel RGBA format
-      const auto pixel_data = convert_to_rgba(img);
-
-      if (!GifWriteFrame(&writer, pixel_data.data(), width, height, delay)) {
-        throw std::runtime_error("GIF frame write failed");
+      if (img.getChannels() != 4) {
+        const auto pixel_data = convert_to_rgba(img);
+        if (!GifWriteFrame(&writer, pixel_data.data(), width, height, delay)) {
+          throw std::runtime_error("GIF frame write failed");
+        }
+      } else {
+        const auto pixel_data = img.getImageData();
+        if (!GifWriteFrame(&writer, pixel_data, width, height, delay)) {
+          throw std::runtime_error("GIF frame write failed");
+        }
       }
     }
   } catch (...) {

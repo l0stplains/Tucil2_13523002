@@ -1,5 +1,6 @@
 #include "cli.h"
 #include "error_measurement/emm_mad.h"
+#include "error_measurement/emm_mpd.h"
 #include "error_measurement/emm_variance.h"
 #include "error_measurement/error_method.h"
 
@@ -25,10 +26,14 @@ bool CLI::start() {
   std::cout << "Enter error method: ";
   std::cin >> userErrorMethodChoice;
   std::string &UEMC = userErrorMethodChoice;
+  userImage.computeSummedAreaTable();
   if (UEMC == "MAD" || UEMC == "MeanAbsoluteDeviation") {
     errorMethod = new EMM::MeanAbsoluteDeviation();
   } else if (UEMC == "VAR" || UEMC == "Variance") {
     errorMethod = new EMM::Variance();
+    userImage.computeSummedSquareTable();
+  } else if (UEMC == "MPD" || UEMC == "MaximumPixelDifferece") {
+    errorMethod = new EMM::MaximumPixelDifference();
   } else {
     std::cerr << "Error: Error Measurement Method unknown!\n";
     return INPUT_FAILED;

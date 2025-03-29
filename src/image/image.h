@@ -26,6 +26,7 @@ public:
   unsigned char *getImageData() const { return mImageData; }
 
   std::array<unsigned char, 3> getColorAt(int x, int y) const;
+  unsigned char getAlphaAt(int x, int y) const;
 
   int getIdxAt(int x, int y, int channel) const;
 
@@ -36,6 +37,12 @@ public:
 
   void setColorAt(int x, int y, unsigned char r, unsigned char g,
                   unsigned char b);
+  void setAlphaAt(int x, int y, unsigned char a);
+
+  void setBlockColorAt(int x, int y, int width, int height, unsigned char r,
+                       unsigned char g, unsigned char b);
+  void computeSummedSquareTable();
+  void computeSummedAreaTable();
 
 private:
   std::string mImagePath;
@@ -46,9 +53,6 @@ private:
   unsigned char *mImageData;
   long long *mSummedAreaTable;
   long long *mSummedSquareTable;
-
-  void computeSummedSquareTable();
-  void computeSummedAreaTable();
 };
 
 #endif
