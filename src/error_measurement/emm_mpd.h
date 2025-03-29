@@ -25,9 +25,9 @@ public:
     unsigned char minG = firstColor[1];
     unsigned char minB = firstColor[2];
 
-    for (int i = x; i < x + width; ++i) {
-      for (int j = y; j < y + height; ++j) {
-        std::array<unsigned char, 3> color = image.getColorAt(i, j);
+    for (int i = y; i < y + height; ++i) {
+      for (int j = x; j < x + width; ++j) {
+        std::array<unsigned char, 3> color = image.getColorAt(j, i);
         maxR = std::max(maxR, color[0]);
         maxG = std::max(maxG, color[1]);
         maxB = std::max(maxB, color[2]);

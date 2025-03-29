@@ -17,6 +17,7 @@ public:
                         int height) const override {
     std::array<unsigned int, 3> sum = {0, 0, 0};
     int count = width * height;
+
     double avgR =
         static_cast<double>(image.getChannelBlockSum(x, y, width, height, 0)) /
         count;
@@ -26,9 +27,10 @@ public:
     double avgB =
         static_cast<double>(image.getChannelBlockSum(x, y, width, height, 2)) /
         count;
-    for (int i = x; i < x + width; ++i) {
-      for (int j = y; j < y + height; ++j) {
-        std::array<unsigned char, 3> color = image.getColorAt(i, j);
+
+    for (int i = y; i < y + height; ++i) {
+      for (int j = x; j < x + width; ++j) {
+        std::array<unsigned char, 3> color = image.getColorAt(j, i);
         sum[0] += std::abs(color[0] - avgR);
         sum[1] += std::abs(color[1] - avgG);
         sum[2] += std::abs(color[2] - avgB);
