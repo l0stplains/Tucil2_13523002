@@ -29,11 +29,13 @@ bool QuadtreeImage::build() {
           mImage, currentNode->mPosX, currentNode->mPosY, currentNode->mWidth,
           currentNode->mHeight);
 
-      const bool exceedsErrorThreshold = nodeError > mThreshold;
+      const bool isQualityAcceptable =
+          mErrorMethod->isQualityAcceptable(nodeError, mThreshold);
+
       const bool hasMinimumSizeForDivision =
           (currentNode->mWidth * currentNode->mHeight) / 4 >= mMinBlockSize;
 
-      if (exceedsErrorThreshold && hasMinimumSizeForDivision) {
+      if (!isQualityAcceptable && hasMinimumSizeForDivision) {
         if (!currentNode->mIsDivided) {
           currentNode->divide();
         }
@@ -47,9 +49,7 @@ bool QuadtreeImage::build() {
       }
     }
 
-    if (!nodeQueue.empty()) {
-      ++mDepth;
-    }
+    mDepth++;
   }
 
   return mRoot != nullptr;

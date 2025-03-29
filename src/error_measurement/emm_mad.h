@@ -43,9 +43,17 @@ public:
 
     return (madR + madG + madB) / 3;
   }
+
   inline bool isInErrorBound(double error) const override {
     return error <= kErrorUpperBound && error >= kErrorLowerBound;
   };
+
+  bool getUpperBound() const override { return kErrorUpperBound; }
+  bool getLowerBound() const override { return kErrorLowerBound; }
+
+  bool isQualityAcceptable(double mad, double threshold) const override {
+    return mad <= threshold;
+  }
 };
 } // namespace EMM
 #endif

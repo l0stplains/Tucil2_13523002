@@ -46,9 +46,17 @@ public:
 
     return static_cast<double>(maxR - minR + maxG - minG + maxB - minB) / 3;
   }
+
   inline bool isInErrorBound(double error) const override {
     return error <= kErrorUpperBound && error >= kErrorLowerBound;
   };
+
+  bool getUpperBound() const override { return kErrorUpperBound; }
+  bool getLowerBound() const override { return kErrorLowerBound; }
+
+  bool isQualityAcceptable(double mpd, double threshold) const override {
+    return mpd <= threshold;
+  }
 };
 } // namespace EMM
 #endif

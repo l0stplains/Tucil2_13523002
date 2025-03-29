@@ -18,7 +18,7 @@ private:
 
   QuadtreeNode *mRoot;
 
-  static constexpr int DEFAULT_SEQUENCE_DELAY = 50;
+  static constexpr int DEFAULT_SEQUENCE_DELAY = 70;
 
 public:
   QuadtreeImage(const Image &image, float threshold, int minBlockSize,

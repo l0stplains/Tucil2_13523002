@@ -2,6 +2,7 @@
 #include "error_measurement/emm_entropy.h"
 #include "error_measurement/emm_mad.h"
 #include "error_measurement/emm_mpd.h"
+#include "error_measurement/emm_ssim.h"
 #include "error_measurement/emm_variance.h"
 #include "error_measurement/error_method.h"
 
@@ -37,6 +38,9 @@ bool CLI::start() {
     errorMethod = new EMM::MaximumPixelDifference();
   } else if (UEMC == "ENT" || UEMC == "Entropy") {
     errorMethod = new EMM::Entropy();
+  } else if (UEMC == "SSIM" || UEMC == "StructuralSimilarityIndexMeasure") {
+    errorMethod = new EMM::StructuralSimilarityIndexMeasure();
+    userImage.computeSummedSquareTable();
   } else {
     std::cerr << "Error: Error Measurement Method unknown!\n";
     return INPUT_FAILED;
@@ -50,7 +54,7 @@ bool CLI::start() {
     return INPUT_FAILED;
   }
 
-  QuadtreeImage img(userImage, thresholdInput, 4 * 4, errorMethod);
+  QuadtreeImage img(userImage, thresholdInput, 8 * 8, errorMethod);
   if (!img.build()) {
     std::cerr << "Error: Building Quadtree Failed!\n";
     return INPUT_FAILED;

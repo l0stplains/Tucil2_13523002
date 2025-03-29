@@ -34,9 +34,17 @@ public:
 
     return (varianceR + varianceG + varianceB) / 3;
   }
+
   inline bool isInErrorBound(double error) const override {
     return error <= kErrorUpperBound && error >= kErrorLowerBound;
   };
+
+  bool getUpperBound() const override { return kErrorUpperBound; }
+  bool getLowerBound() const override { return kErrorLowerBound; }
+
+  bool isQualityAcceptable(double variance, double threshold) const override {
+    return variance <= threshold;
+  }
 };
 } // namespace EMM
 #endif

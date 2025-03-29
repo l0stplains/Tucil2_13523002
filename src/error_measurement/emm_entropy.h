@@ -21,9 +21,9 @@ public:
     std::array<int, 256> histG = {0};
     std::array<int, 256> histB = {0};
 
-    for (int i = x; i < x + width; ++i) {
-      for (int j = y; j < y + height; ++j) {
-        std::array<unsigned char, 3> color = image.getColorAt(i, j);
+    for (int i = y; i < y + height; ++i) {
+      for (int j = x; j < x + width; ++j) {
+        std::array<unsigned char, 3> color = image.getColorAt(j, i);
         ++histR[color[0]];
         ++histG[color[1]];
         ++histB[color[2]];
@@ -50,6 +50,13 @@ public:
 
   inline bool isInErrorBound(double error) const override {
     return error <= kErrorUpperBound && error >= kErrorLowerBound;
+  };
+
+  bool getUpperBound() const override { return kErrorUpperBound; }
+  bool getLowerBound() const override { return kErrorLowerBound; }
+
+  bool isQualityAcceptable(double entropy, double threshold) const override {
+    return entropy <= threshold;
   }
 };
 
