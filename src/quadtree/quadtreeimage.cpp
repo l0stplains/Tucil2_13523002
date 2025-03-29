@@ -97,6 +97,51 @@ Image QuadtreeImage::apply() {
   return resultImage;
 }
 
+ImageSequence QuadtreeImage::applyAnimation() {
+  DEBUG_TIMER("Applying tree to image sequence");
+  ImageSequence resultSequence;
+  Image tempImage(mImage);
+
+  std::queue<QuadtreeNode *> nodeQueue;
+  nodeQueue.push(mRoot);
+
+  while (!nodeQueue.empty()) {
+    const int nodesThisLevel = nodeQueue.size();
+
+    for (int i = 0; i < nodesThisLevel; ++i) {
+      QuadtreeNode *current = nodeQueue.front();
+      nodeQueue.pop();
+
+      const int area = current->mWidth * current->mHeight;
+      const int x = current->mPosX;
+      const int y = current->mPosY;
+      const int w = current->mWidth;
+      const int h = current->mHeight;
+
+      unsigned char avgR = static_cast<unsigned char>(
+          mImage.getChannelBlockSum(x, y, w, h, 0) / area);
+      unsigned char avgG = static_cast<unsigned char>(
+          mImage.getChannelBlockSum(x, y, w, h, 1) / area);
+      unsigned char avgB = static_cast<unsigned char>(
+          mImage.getChannelBlockSum(x, y, w, h, 2) / area);
+
+      for (int i = x; i < x + w; ++i) {
+        for (int j = y; j < y + h; ++j) {
+          tempImage.setColorAt(i, j, avgR, avgG, avgB);
+        }
+      }
+      for (auto &child : current->mChildren) {
+        if (child != nullptr) {
+          nodeQueue.push(child);
+        }
+      }
+    }
+    resultSequence.addImage(tempImage, DEFAULT_SEQUENCE_DELAY);
+  }
+
+  return resultSequence;
+}
+
 void QuadtreeImage::clear() {
   if (mRoot) {
     delete mRoot;

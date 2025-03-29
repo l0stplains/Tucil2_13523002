@@ -2,7 +2,6 @@
 build/
 /lib/
 
-
 # CMake generated files
 CMakeCache.txt
 CMakeFiles/

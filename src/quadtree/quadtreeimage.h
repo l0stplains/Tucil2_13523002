@@ -3,6 +3,7 @@
 
 #include "error_measurement/error_method.h"
 #include "image/image.h"
+#include "image/image_sequence.h"
 #include "quadtreenode.h"
 
 class QuadtreeImage {
@@ -17,6 +18,8 @@ private:
 
   QuadtreeNode *mRoot;
 
+  static constexpr int DEFAULT_SEQUENCE_DELAY = 50;
+
 public:
   QuadtreeImage(const Image &image, float threshold, int minBlockSize,
                 ErrorMethod *errorMethod);
@@ -25,6 +28,7 @@ public:
   bool build();
 
   Image apply();
+  ImageSequence applyAnimation();
 
   void clear();
 

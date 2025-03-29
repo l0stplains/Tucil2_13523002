@@ -58,5 +58,8 @@ bool CLI::start() {
   Image resultImage = img.apply();
   resultImage.save(outputPath);
 
+  ImageSequence resultSequence = img.applyAnimation();
+  resultSequence.save(outputPath + ".gif");
+
   return INPUT_SUCCESS;
 }

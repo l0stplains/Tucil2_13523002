@@ -23,6 +23,7 @@ public:
   int getWidth() const { return mImageWidth; }
   int getHeight() const { return mImageHeight; }
   int getChannels() const { return mChannels; }
+  unsigned char *getImageData() const { return mImageData; }
 
   std::array<unsigned char, 3> getColorAt(int x, int y) const;
 
