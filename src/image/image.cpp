@@ -12,9 +12,9 @@
 namespace fs = std::filesystem;
 
 Image::Image(const std::string &imagePath)
-    : mImagePath(fs::absolute(imagePath)), mFileExt(""), mImageWidth(0),
-      mImageHeight(0), mChannels(0), mImageData(nullptr), mFileSize(0),
-      mSummedAreaTable(nullptr), mSummedSquareTable(nullptr) {}
+    : mImagePath(fs::absolute(imagePath).string()), mFileExt(""),
+      mImageWidth(0), mImageHeight(0), mChannels(0), mImageData(nullptr),
+      mFileSize(0), mSummedAreaTable(nullptr), mSummedSquareTable(nullptr) {}
 
 Image::Image(const Image &other)
     : mImagePath(other.mImagePath), mFileExt(other.mFileExt),
@@ -125,7 +125,7 @@ bool Image::save(const std::string &outputPath = "") {
   // idk
   if (savePath.empty()) {
     fs::path originalPath(mImagePath);
-    savePath = originalPath.replace_extension(mFileExt);
+    savePath = originalPath.replace_extension(mFileExt).string();
   }
 
   if (mFileExt == ".png") {

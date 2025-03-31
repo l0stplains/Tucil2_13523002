@@ -953,6 +953,13 @@ CompressionResult CLI::run() {
   std::cout << "  " << std::left << std::setw(labelWidth)
             << "Node Count:" << result.quadtreeNodeCount << std::endl;
 
+  if (compression.getTargetCompression()) {
+
+    std::cout << "  " << std::left << std::setw(labelWidth)
+              << "Target Threshold:"
+              << std::to_string(compression.getThreshold()) << std::endl;
+  }
+
   std::cout << std::endl << BOLD << "  Output Files" << RESET << std::endl;
   std::cout << "  " << std::left << std::setw(labelWidth)
             << "Compressed File:" << result.outputFilePath << std::endl;

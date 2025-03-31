@@ -1,5 +1,6 @@
 #ifndef EMM_MPD_H
 #define EMM_MPD_H
+#define NOMINMAX
 
 #include "error_method.h"
 #include <algorithm>
@@ -28,13 +29,13 @@ public:
     for (int i = y; i < y + height; ++i) {
       for (int j = x; j < x + width; ++j) {
         std::array<unsigned char, 3> color = image.getColorAt(j, i);
-        maxR = std::max(maxR, color[0]);
-        maxG = std::max(maxG, color[1]);
-        maxB = std::max(maxB, color[2]);
+        maxR = (std::max)(maxR, color[0]);
+        maxG = (std::max)(maxG, color[1]);
+        maxB = (std::max)(maxB, color[2]);
 
-        minR = std::min(minR, color[0]);
-        minG = std::min(minG, color[1]);
-        minB = std::min(minB, color[2]);
+        minR = (std::min)(minR, color[0]);
+        minG = (std::min)(minG, color[1]);
+        minB = (std::min)(minB, color[2]);
 
         // early exit if maximum difference is reached for all channels
         if (maxR == 255 && minR == 0 && maxG == 255 && minG == 0 &&
