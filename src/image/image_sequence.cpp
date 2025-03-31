@@ -1,6 +1,6 @@
 #include "image_sequence.h"
 #include "gif.h"
-#include "utils/debug.h"
+// #include "utils/debug.h"
 #include <stdexcept>
 #include <vector>
 
@@ -30,7 +30,7 @@ std::vector<uint8_t> convert_to_rgba(const Image &img) {
 } // namespace
 
 bool ImageSequence::save(const std::string &output_path) const {
-  DEBUG_TIMER("Saving Gif");
+  // DEBUG_TIMER("Saving Gif");
   if (mFrames.empty())
     return false;
 

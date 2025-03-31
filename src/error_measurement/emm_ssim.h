@@ -48,12 +48,13 @@ public:
     return error <= kErrorUpperBound && error >= kErrorLowerBound;
   };
 
-  bool getUpperBound() const override { return kErrorUpperBound; }
-  bool getLowerBound() const override { return kErrorLowerBound; }
+  double getUpperBound() const override { return kErrorUpperBound; }
+  double getLowerBound() const override { return kErrorLowerBound; }
 
   bool isQualityAcceptable(double ssim, double threshold) const override {
     return ssim >= threshold;
   }
+  std::string getIdentifier() const override { return "SIM"; }
 };
 } // namespace EMM
 #endif

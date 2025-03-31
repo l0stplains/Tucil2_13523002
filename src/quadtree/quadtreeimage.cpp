@@ -1,5 +1,5 @@
 #include "quadtreeimage.h"
-#include "utils/debug.h"
+// #include "utils/debug.h"
 #include <queue>
 
 QuadtreeImage::QuadtreeImage(const Image &image, float threshold,
@@ -10,7 +10,7 @@ QuadtreeImage::QuadtreeImage(const Image &image, float threshold,
 QuadtreeImage::~QuadtreeImage() { clear(); }
 
 bool QuadtreeImage::build() {
-  DEBUG_TIMER("Building tree");
+  // DEBUG_TIMER("Building tree");
   mRoot = new QuadtreeNode(0, 0, mImage.getWidth(), mImage.getHeight());
   std::queue<QuadtreeNode *> nodeQueue;
   nodeQueue.push(mRoot);
@@ -56,7 +56,7 @@ bool QuadtreeImage::build() {
 }
 
 Image QuadtreeImage::apply() {
-  DEBUG_TIMER("Applying tree to image");
+  // DEBUG_TIMER("Applying tree to image");
   Image resultImage(mImage);
 
   std::queue<QuadtreeNode *> nodeQueue;
@@ -106,7 +106,7 @@ Image QuadtreeImage::apply() {
 }
 
 ImageSequence QuadtreeImage::applyAnimation() {
-  DEBUG_TIMER("Applying tree to image sequence");
+  // DEBUG_TIMER("Applying tree to image sequence");
   ImageSequence resultSequence;
   Image tempImage(mImage);
 

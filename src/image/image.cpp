@@ -4,7 +4,7 @@
 #include "stb_image.h"
 #define STB_IMAGE_WRITE_IMPLEMENTATION
 #include "stb_image_writer.h"
-#include "utils/debug.h"
+// #include "utils/debug.h"
 #include <algorithm>
 #include <filesystem>
 #include <iostream>
@@ -109,9 +109,6 @@ bool Image::load() {
     std::cerr << "Non-RGB image not supported" << std::endl;
     return true;
   }
-  std::cout << "Loaded image (" << mImageWidth << "x" << mImageHeight
-            << ") with " << mChannels << " channels."
-            << " File type: " << mFileType << std::endl;
   return false;
 }
 
@@ -150,7 +147,7 @@ bool Image::save(const std::string &outputPath = "") const {
 }
 
 void Image::computeSummedAreaTable() {
-  DEBUG_TIMER("Compute summed area table");
+  // DEBUG_TIMER("Compute summed area table");
   int totalPixels = mImageWidth * mImageHeight;
   int tableSize = totalPixels * mChannels;
   mSummedAreaTable = new long long[tableSize];
@@ -176,7 +173,7 @@ void Image::computeSummedAreaTable() {
 }
 
 void Image::computeSummedSquareTable() {
-  DEBUG_TIMER("Compute square area table");
+  // DEBUG_TIMER("Compute square area table");
   int totalPixels = mImageWidth * mImageHeight;
   int tableSize = totalPixels * mChannels;
   mSummedSquareTable = new long long[tableSize];
@@ -287,8 +284,8 @@ void Image::setBlockColorAt(int startX, int startY, int blockWidth,
     rowBuffer[i * mChannels + 0] = r;
     rowBuffer[i * mChannels + 1] = g;
     rowBuffer[i * mChannels + 2] = b;
-    for (int c = 3; c < mChannels; ++c) {
-      rowBuffer[i * mChannels + c] = 255;
+    if (mChannels == 4) {
+      rowBuffer[i * mChannels + 3] = 255;
     }
   }
 

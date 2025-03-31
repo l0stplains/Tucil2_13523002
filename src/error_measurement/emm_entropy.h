@@ -52,12 +52,13 @@ public:
     return error <= kErrorUpperBound && error >= kErrorLowerBound;
   };
 
-  bool getUpperBound() const override { return kErrorUpperBound; }
-  bool getLowerBound() const override { return kErrorLowerBound; }
+  double getUpperBound() const override { return kErrorUpperBound; }
+  double getLowerBound() const override { return kErrorLowerBound; }
 
   bool isQualityAcceptable(double entropy, double threshold) const override {
     return entropy <= threshold;
   }
+  std::string getIdentifier() const override { return "ENT"; }
 };
 
 } // namespace EMM

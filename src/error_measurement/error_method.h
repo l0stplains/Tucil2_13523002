@@ -10,10 +10,11 @@ public:
                                 int height) const = 0;
   virtual bool isInErrorBound(double error) const = 0;
 
-  virtual bool getUpperBound() const = 0;
-  virtual bool getLowerBound() const = 0;
+  virtual double getUpperBound() const = 0;
+  virtual double getLowerBound() const = 0;
 
   virtual bool isQualityAcceptable(double error, double threshold) const = 0;
+  virtual std::string getIdentifier() const = 0;
 };
 
 #endif

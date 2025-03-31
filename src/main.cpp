@@ -2,5 +2,6 @@
 
 int main() {
   CLI cli;
-  return cli.start();
+  cli.run();
+  return 0;
 }
