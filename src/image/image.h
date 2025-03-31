@@ -15,14 +15,16 @@ public:
   ~Image();
 
   std::string getImagePath() const { return mImagePath; }
-  std::string getFileType() const { return mFileType; }
+  std::string getFileExt() const { return mFileExt; }
 
   bool load();
-  bool save(const std::string &outputPath) const;
+  bool save(const std::string &outputPath);
+  long long estimateFileSize() const;
 
   int getWidth() const { return mImageWidth; }
   int getHeight() const { return mImageHeight; }
   int getChannels() const { return mChannels; }
+  long long getFileSize() const { return mFileSize; }
   unsigned char *getImageData() const { return mImageData; }
 
   std::array<unsigned char, 3> getColorAt(int x, int y) const;
@@ -46,11 +48,14 @@ public:
 
 private:
   std::string mImagePath;
-  std::string mFileType;
+  std::string mFileExt;
   int mImageWidth;
   int mImageHeight;
   int mChannels;
   unsigned char *mImageData;
+
+  long long mFileSize;
+
   long long *mSummedAreaTable;
   long long *mSummedSquareTable;
 };

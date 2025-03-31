@@ -41,6 +41,8 @@ private:
 
   CompressionResult result;
 
+  void findTargetCompression(Image &, long long);
+
 public:
   CompressionController() : mErrorMethod(nullptr){};
 

@@ -47,6 +47,7 @@ private:
   void resetTerminal();
   void clearScreen();
   void clearLine();
+  std::string doubleToString(double value, int precision);
   void moveCursorUp(int lines);
   void moveCursorToColumn(int col);
   std::pair<int, int> getTerminalSize();

@@ -2,9 +2,10 @@
 #include "quadtree/quadtreeimage.h"
 #include <algorithm>
 #include <cassert>
+#include <cstdlib>
 #include <filesystem>
-#include <iterator>
 #include <string>
+#include <utility>
 
 namespace fs = std::filesystem;
 
@@ -97,6 +98,8 @@ bool CompressionController::run(
 
   if (mTargetCompression) {
     progressCallback(ProgressStage::FindingTarget);
+    long long targetSize = (1.0 - mTargetCompression) * image.getFileSize();
+    findTargetCompression(image, targetSize);
   }
 
   progressCallback(ProgressStage::BuildingTree);
@@ -111,9 +114,12 @@ bool CompressionController::run(
   progressCallback(ProgressStage::SavingImage);
   resultImage.save(mOutputPath);
 
-  result.originalFileSize = 10000;
-  result.compressedFileSize = 9000;
-  result.compressionPercentage = 10;
+  result.originalFileSize = image.getFileSize();
+  result.compressedFileSize = resultImage.getFileSize();
+  result.compressionPercentage =
+      (1.0 -
+       static_cast<double>(resultImage.getFileSize()) / image.getFileSize()) *
+      100;
   result.quadtreeDepth = quadtree.getDepth();
   result.quadtreeNodeCount = quadtree.getNodeCount();
   result.outputFilePath = mOutputPath;
@@ -127,4 +133,60 @@ bool CompressionController::run(
 
   progressCallback(ProgressStage::Finished);
   return true;
+}
+
+void CompressionController::findTargetCompression(Image &image,
+                                                  long long targetSize) {
+  long long leftSize, rightSize, middleSize;
+  Image res(mInputPath);
+  double rightThreshold = mErrorMethod->getUpperBound();
+  double leftThreshold = mErrorMethod->getLowerBound();
+  if (mErrorMethod->getIdentifier() == "SIM") {
+    std::swap(rightThreshold, leftThreshold);
+  }
+  double middleThreshold;
+  QuadtreeImage quadtreeLeft(image, leftThreshold, mMinBlockSize, mErrorMethod);
+  quadtreeLeft.build();
+  res = quadtreeLeft.apply();
+  leftSize = res.estimateFileSize();
+  if (targetSize > leftSize) {
+    mThreshold = leftThreshold;
+    return;
+  }
+
+  QuadtreeImage quadtreeRight(image, rightThreshold, mMinBlockSize,
+                              mErrorMethod);
+  quadtreeRight.build();
+  res = quadtreeRight.apply();
+  rightSize = res.estimateFileSize();
+
+  if (targetSize < rightSize) {
+    mThreshold = rightThreshold;
+    return;
+  }
+
+  for (int i = 1; i < 32; i++) {
+    middleThreshold = (leftThreshold + rightThreshold) / 2.0;
+    if (std::abs(middleThreshold - rightThreshold) < 0.00001 &&
+        std::abs(middleThreshold - leftThreshold) < 0.00001) {
+      break;
+    }
+    QuadtreeImage quadtreeMiddle(image, middleThreshold, mMinBlockSize,
+                                 mErrorMethod);
+    quadtreeMiddle.build();
+    res = quadtreeMiddle.apply();
+    middleSize = res.estimateFileSize();
+
+    if (std::abs(middleSize - targetSize) < 10) {
+      mThreshold = middleThreshold;
+      return;
+    }
+    if (targetSize > middleSize) {
+      rightThreshold = middleThreshold;
+    } else {
+      leftThreshold = middleThreshold;
+    }
+  }
+  mThreshold = middleThreshold;
+  return;
 }

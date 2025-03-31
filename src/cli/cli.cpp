@@ -14,6 +14,7 @@
 #include <sstream>
 
 #include <condition_variable>
+#include <string>
 
 std::condition_variable spinnerCv;
 std::mutex spinnerCvMutex;
@@ -78,6 +79,12 @@ void CLI::resetTerminal() {
 void CLI::clearScreen() { std::cout << "\033[2J\033[H" << std::flush; }
 
 void CLI::clearLine() { std::cout << "\r\033[K" << std::flush; }
+
+std::string CLI::doubleToString(double value, int precision = 2) {
+  std::ostringstream oss;
+  oss << std::fixed << std::setprecision(precision) << value;
+  return oss.str();
+}
 
 void CLI::moveCursorUp(int lines) {
   std::cout << "\033[" << lines << "A" << std::flush;
@@ -344,14 +351,10 @@ std::string CLI::getFilePath(const std::string &prompt,
     // check existence or directory validity
     if (mustExist) {
       if (!fs::exists(path)) {
-        // if file doesn't exist, check if the parent directory exists
-        fs::path dirPath = fs::path(path).parent_path();
-        if (dirPath.empty() || !fs::exists(dirPath)) {
-          moveCursorUp(4 + isError);
-          isError = true;
-          printErrorMessage("File or its directory do not exist");
-          continue;
-        }
+        moveCursorUp(4 + isError);
+        isError = true;
+        printErrorMessage("File doesn't exist");
+        continue;
       }
     } else {
       // for non-required files, check that the parent directory exists
@@ -614,9 +617,9 @@ void CLI::startSpinner(const std::string &message) {
               .count();
       std::string timeStr;
       if (elapsedMs < 1000) {
-        timeStr = std::to_string(elapsedMs) + " ms";
+        timeStr = doubleToString(elapsedMs) + " ms";
       } else {
-        timeStr = std::to_string(elapsedMs / 1000.0).substr(0, 4) + " s";
+        timeStr = doubleToString(elapsedMs / 1000.0).substr(0, 4) + " s";
       }
 
       clearLine();
@@ -654,9 +657,9 @@ void CLI::stopSpinner(bool success, const std::string &message) {
 
   std::string timeStr;
   if (elapsedMs < 1000) {
-    timeStr = std::to_string(elapsedMs) + " ms";
+    timeStr = doubleToString(elapsedMs) + " ms";
   } else {
-    timeStr = std::to_string(elapsedMs / 1000.0).substr(0, 4) + " s";
+    timeStr = doubleToString(elapsedMs / 1000.0).substr(0, 4) + " s";
   }
 
   clearLine();
@@ -673,10 +676,11 @@ void CLI::updateSpinnerMessage(const std::string &message) {
   std::lock_guard<std::mutex> lock(spinnerMutex);
   spinnerMessage = message;
 }
-
+/*
 void CLI::updateSpinnerProgress(double progress) {
   // if i even need, i could add progress bar functionality here
 }
+*/
 CompressionResult CLI::processImage() {
 
   CompressionResult result;
@@ -688,7 +692,8 @@ CompressionResult CLI::processImage() {
     case ProgressStage::Precompute:
       return {"Precomputing summed area table", "Summed area table computed"};
     case ProgressStage::FindingTarget:
-      return {"Finding target compression", "Target compression achieved"};
+      return {"Finding target compression",
+              "Target compression achieved with "};
     case ProgressStage::BuildingTree:
       return {"Building quadtree", "Building quadtree finished"};
     case ProgressStage::TransformingImage:
@@ -710,7 +715,14 @@ CompressionResult CLI::processImage() {
     auto [startMsg, stopMsg] = stageInfo(stage);
 
     if (!firstCall) {
-      stopSpinner(true, stageInfo(lastStage).second);
+      if (lastStage == ProgressStage::FindingTarget) {
+        stopSpinner(true, stageInfo(lastStage).second +
+                              doubleToString(compression.getThreshold()) +
+                              " threshold");
+      } else {
+
+        stopSpinner(true, stageInfo(lastStage).second);
+      }
     } else {
       firstCall = false;
     }
@@ -794,15 +806,15 @@ CompressionResult CLI::run() {
     double upper = compression.getErrorMethod()->getUpperBound();
     double threshold =
         getNumberInput("Enter error threshold",
-                       "Threshold is in range " + std::to_string(lower) + "-" +
-                           std::to_string(upper),
+                       "Threshold is in range " + doubleToString(lower) + "-" +
+                           doubleToString(upper),
                        lower, upper, "");
     if (threshold < 0)
       return run();
 
     state.threshold = threshold;
     compression.setThreshold(threshold);
-    inputPromptHistory.push_back("Threshold: " + std::to_string(threshold));
+    inputPromptHistory.push_back("Threshold: " + doubleToString(threshold));
     state.currentInputStep++;
   }
 
@@ -840,7 +852,7 @@ CompressionResult CLI::run() {
       inputPromptHistory.push_back("Compression target: None");
     } else {
       inputPromptHistory.push_back(
-          "Compression target: " + std::to_string(target * 100) + "%");
+          "Compression target: " + doubleToString(target * 100) + "%");
     }
     state.currentInputStep++;
   }
@@ -894,7 +906,8 @@ CompressionResult CLI::run() {
             << std::endl;
   CompressionResult result = processImage();
 
-  clearScreen();
+  std::cout << std::endl;
+  // clearScreen();
   printTitle("Compression Results");
 
   const int labelWidth = 25;
@@ -913,9 +926,9 @@ CompressionResult CLI::run() {
 
   std::string timeStr;
   if (totalElapsedTime < 1000) {
-    timeStr = std::to_string(totalElapsedTime) + " ms";
+    timeStr = doubleToString(totalElapsedTime) + " ms";
   } else {
-    timeStr = std::to_string(totalElapsedTime / 1000.0).substr(0, 4) + " s";
+    timeStr = doubleToString(totalElapsedTime / 1000.0).substr(0, 4) + " s";
   }
 
   std::cout << BOLD << "  Performance Metrics" << RESET << std::endl;

@@ -12,14 +12,15 @@
 namespace fs = std::filesystem;
 
 Image::Image(const std::string &imagePath)
-    : mImagePath(fs::absolute(imagePath)), mImageWidth(0), mImageHeight(0),
-      mChannels(0), mImageData(nullptr), mSummedAreaTable(nullptr),
-      mSummedSquareTable(nullptr) {}
+    : mImagePath(fs::absolute(imagePath)), mFileExt(""), mImageWidth(0),
+      mImageHeight(0), mChannels(0), mImageData(nullptr), mFileSize(0),
+      mSummedAreaTable(nullptr), mSummedSquareTable(nullptr) {}
 
 Image::Image(const Image &other)
-    : mImagePath(other.mImagePath), mImageWidth(other.mImageWidth),
-      mImageHeight(other.mImageHeight), mChannels(other.mChannels),
-      mImageData(nullptr), mSummedAreaTable(nullptr),
+    : mImagePath(other.mImagePath), mFileExt(other.mFileExt),
+      mImageWidth(other.mImageWidth), mImageHeight(other.mImageHeight),
+      mChannels(other.mChannels), mImageData(nullptr),
+      mFileSize(other.mFileSize), mSummedAreaTable(nullptr),
       mSummedSquareTable(nullptr) {
 
   if (other.mImageData) {
@@ -51,6 +52,7 @@ Image &Image::operator=(const Image &other) {
     mImagePath = other.mImagePath;
     mImageWidth = other.mImageWidth;
     mImageHeight = other.mImageHeight;
+    mFileExt = other.mFileExt;
     mChannels = other.mChannels;
 
     if (other.mImageData) {
@@ -90,13 +92,17 @@ Image::~Image() {
 }
 
 bool Image::load() {
+
   fs::path filepath(mImagePath);
-  mFileType = filepath.extension().string();
-  std::transform(mFileType.begin(), mFileType.end(), mFileType.begin(),
+
+  mFileExt = filepath.extension().string();
+  std::transform(mFileExt.begin(), mFileExt.end(), mFileExt.begin(),
                  [](unsigned char c) { return std::tolower(c); });
 
-  if (!mFileType.empty() && mFileType[0] == '.') {
-    mFileType = mFileType.substr(1);
+  try {
+    mFileSize = fs::file_size(filepath);
+  } catch (const fs::filesystem_error &e) {
+    std::cerr << "Error getting file size: " << e.what() << std::endl;
   }
 
   mImageData =
@@ -112,38 +118,78 @@ bool Image::load() {
   return false;
 }
 
-bool Image::save(const std::string &outputPath = "") const {
+bool Image::save(const std::string &outputPath = "") {
   std::string savePath = outputPath;
+  bool isSuccess = false;
 
   // idk
   if (savePath.empty()) {
     fs::path originalPath(mImagePath);
-    savePath = originalPath.replace_extension(mFileType);
+    savePath = originalPath.replace_extension(mFileExt);
   }
 
-  std::cout << mFileType << " anjay" << std::endl;
-  if (mFileType == "png") {
-    return stbi_write_png(savePath.c_str(), mImageWidth, mImageHeight,
-                          mChannels, mImageData, mImageWidth * mChannels) != 0;
-  } else if (mFileType == "jpg" || mFileType == "jpeg") {
-    return stbi_write_jpg(savePath.c_str(), mImageWidth, mImageHeight,
-                          mChannels, mImageData,
-                          90 // default quality
-                          ) != 0;
-  } else if (mFileType == "bmp") {
-    return stbi_write_bmp(savePath.c_str(), mImageWidth, mImageHeight,
-                          mChannels, mImageData) != 0;
+  if (mFileExt == ".png") {
+    isSuccess =
+        stbi_write_png(savePath.c_str(), mImageWidth, mImageHeight, mChannels,
+                       mImageData, mImageWidth * mChannels) != 0;
+  } else if (mFileExt == ".jpg" || mFileExt == ".jpeg") {
+
+    isSuccess = stbi_write_jpg(savePath.c_str(), mImageWidth, mImageHeight,
+                               mChannels, mImageData,
+                               68 // quality
+                               ) != 0;
+  } else if (mFileExt == ".bmp") {
+    isSuccess = stbi_write_bmp(savePath.c_str(), mImageWidth, mImageHeight,
+                               mChannels, mImageData) != 0;
+  } else if (mFileExt == ".tga") {
+    isSuccess = stbi_write_tga(savePath.c_str(), mImageWidth, mImageHeight,
+                               mChannels, mImageData);
   } else {
 
-    std::cerr << "Unknown file type, saving as PNG" << std::endl;
-    savePath = outputPath.empty() ? std::filesystem::path(mImagePath)
-                                        .replace_extension("png")
-                                        .string()
-                                  : outputPath;
+    savePath = outputPath.empty()
+                   ? fs::path(mImagePath).replace_extension("png").string()
+                   : outputPath;
 
-    return stbi_write_png(savePath.c_str(), mImageWidth, mImageHeight,
-                          mChannels, mImageData, mImageWidth * mChannels) != 0;
+    isSuccess =
+        stbi_write_png(savePath.c_str(), mImageWidth, mImageHeight, mChannels,
+                       mImageData, mImageWidth * mChannels) != 0;
   }
+  if (isSuccess) {
+    try {
+      mFileSize = fs::file_size(savePath);
+    } catch (const fs::filesystem_error &e) {
+      std::cerr << "Error getting file size: " << e.what() << std::endl;
+    }
+  }
+  return isSuccess;
+}
+
+static void count_bytes(void *context, void *data, int size) {
+  (void)data;
+  size_t *total = reinterpret_cast<size_t *>(context);
+  *total += static_cast<size_t>(size);
+}
+
+long long Image::estimateFileSize() const {
+  size_t totalBytes = 0;
+
+  if (mFileExt == ".png") {
+    stbi_write_png_to_func(count_bytes, &totalBytes, mImageWidth, mImageHeight,
+                           mChannels, mImageData, mImageWidth * mChannels);
+  } else if (mFileExt == ".jpg" || mFileExt == ".jpeg") {
+    stbi_write_jpg_to_func(count_bytes, &totalBytes, mImageWidth, mImageHeight,
+                           mChannels, mImageData, 68);
+  } else if (mFileExt == ".bmp") {
+    stbi_write_bmp_to_func(count_bytes, &totalBytes, mImageWidth, mImageHeight,
+                           mChannels, mImageData);
+  } else if (mFileExt == ".tga") {
+    stbi_write_tga_to_func(count_bytes, &totalBytes, mImageWidth, mImageHeight,
+                           mChannels, mImageData);
+  } else {
+    stbi_write_png_to_func(count_bytes, &totalBytes, mImageWidth, mImageHeight,
+                           mChannels, mImageData, mImageWidth * mChannels);
+  }
+  return totalBytes;
 }
 
 void Image::computeSummedAreaTable() {
