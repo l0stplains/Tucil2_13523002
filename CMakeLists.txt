@@ -8,7 +8,10 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 # compiler warnings and flags
 if(MSVC)
-    add_compile_options(/W4 /permissive- /O2)
+  add_compile_options(/W4 /permissive- )
+  if(CMAKE_BUILD_TYPE STREQUAL "Release")
+    add_compile_options(/O2)
+  endif()
 else()
     add_compile_options(-Wall -Wextra -Wno-missing-field-initializers -pedantic -O3)
 endif()

@@ -44,6 +44,7 @@ void CLI::setupTerminal() {
   hStdin = GetStdHandle(STD_INPUT_HANDLE);
   hStdout = GetStdHandle(STD_OUTPUT_HANDLE);
   GetConsoleMode(hStdin, &oldConsoleMode);
+  SetConsoleOutputCP(CP_UTF8);
 
   // enable virtual terminal processing for ANSI colors
   DWORD mode = 0;
