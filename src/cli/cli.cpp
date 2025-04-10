@@ -53,8 +53,8 @@ void CLI::setupTerminal() {
 
   // set input mode for arrow keys
   SetConsoleMode(hStdin, ENABLE_EXTENDED_FLAGS |
-                             (oldConsoleMode & ~ENABLE_QUICK_EDIT_MODE) |
-                             ENABLE_WINDOW_INPUT);
+		  (oldConsoleMode & ~ENABLE_QUICK_EDIT_MODE));
+
 #else
   // unix terminal setup
   struct termios newTermios;
@@ -154,22 +154,19 @@ int CLI::getCharWithTimeout(int timeout_ms) {
 
 int CLI::handleArrowKeys() {
 #ifdef _WIN32
-  char c = getChar();
-  if (c == 0 || c == 224) { // arrow keys prefix
-    switch (getChar()) {
-    case 72:
-      return 1; // up
-    case 80:
-      return 2; // down
-    case 75:
-      return 3; // left
-    case 77:
-      return 4; // right
-    default:
-      return 0;
-    }
-  }
-  return c;
+	char c = getChar();
+	switch (c) {
+		case 72:
+			return 1; // up
+		case 80:
+			return 2; // down
+		case 75:
+			return 3; // left
+		case 77:
+			return 4; // right
+		default:
+			return c;
+	}
 #else
   char c = getChar();
   if (c == 27) { // ESC key detected
