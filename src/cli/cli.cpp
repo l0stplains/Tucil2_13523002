@@ -156,41 +156,19 @@ int CLI::getCharWithTimeout(int timeout_ms) {
 
 int CLI::handleArrowKeys() {
 #ifdef _WIN32
-<<<<<<< HEAD
-	char c = getChar();
-	switch (c) {
-		case 72:
-			return 1; // up
-		case 80:
-			return 2; // down
-		case 75:
-			return 3; // left
-		case 77:
-			return 4; // right
-		default:
-			return c;
-	}
-=======
   char c = getChar();
-  std::cout << "TATANG: " << c << endl;
-  if (c == 0 || c == 224) { // arrow keys prefix
-    char d = getChar();
-    std::cout << "TATANG: " << d << endl;
-    switch (d) {
-    case 72:
-      return 1; // up
-    case 80:
-      return 2; // down
-    case 75:
-      return 3; // left
-    case 77:
-      return 4; // right
-    default:
-      return 0;
-    }
+  switch (c) {
+  case 72:
+    return 1; // up
+  case 80:
+    return 2; // down
+  case 75:
+    return 3; // left
+  case 77:
+    return 4; // right
+  default:
+    return c;
   }
-  return c;
->>>>>>> 09a94af891a59b73327923e81fa2aeac178f4381
 #else
   char c = getChar();
   if (c == 27) { // ESC key detected
