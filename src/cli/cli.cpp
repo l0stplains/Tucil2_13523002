@@ -15,6 +15,15 @@
 
 #include <condition_variable>
 #include <string>
+#include <csignal>
+#include <cstdlib>
+
+// handle SIGINT
+void sigintHandler(int signum) {
+  std::cout << CLEAR_SCREEN << "Interrupt received. Exiting...\n";
+  std::exit(signum);
+}
+
 
 std::condition_variable spinnerCv;
 std::mutex spinnerCvMutex;
@@ -46,16 +55,17 @@ void CLI::setupTerminal() {
   GetConsoleMode(hStdin, &oldConsoleMode);
   SetConsoleOutputCP(CP_UTF8);
 
-  // enable virtual terminal processing for ANSI colors
-  DWORD mode = 0;
-  GetConsoleMode(hStdout, &mode);
-  SetConsoleMode(hStdout, mode | ENABLE_VIRTUAL_TERMINAL_PROCESSING);
+  // for the output handle, enable virtual terminal processing
+  DWORD outMode = 0;
+  GetConsoleMode(hStdout, &outMode);
+  SetConsoleMode(hStdout, outMode | ENABLE_VIRTUAL_TERMINAL_PROCESSING);
 
+  // for input, retrieve the current mode
   DWORD inMode = 0;
   GetConsoleMode(hStdin, &inMode);
-  // Set the mode to include processed input but disable Quick Edit if needed.
-  SetConsoleMode(hStdin, ENABLE_PROCESSED_INPUT | ENABLE_EXTENDED_FLAGS |
-                             (inMode & ~ENABLE_QUICK_EDIT_MODE));
+  // Make sure ENABLE_PROCESSED_INPUT is set to process CTRL+C
+  // and ENABLE_QUICK_EDIT_MODE is disabled
+  SetConsoleMode(hStdin, (inMode | ENABLE_PROCESSED_INPUT) & ~ENABLE_QUICK_EDIT_MODE);
 #else
   // unix terminal setup
   struct termios newTermios;
@@ -157,6 +167,9 @@ int CLI::getCharWithTimeout(int timeout_ms) {
 int CLI::handleArrowKeys() {
 #ifdef _WIN32
   char c = getChar();
+    if (c == 3) {
+    return -2; 
+  }
   switch (c) {
   case 72:
     return 1; // up
@@ -208,7 +221,11 @@ std::string CLI::readInput(const std::string &placeholder) {
   while (inputActive) {
     int c = handleArrowKeys();
 
-    if (c == 27) { // ESC
+    if (c == -2) {
+      // call the SIGINT handler directly
+      sigintHandler(SIGINT);
+      return ""; // this line won't be reached if sigintHandler exits
+    } else if (c == 27) { // ESC
       goToPreviousInput();
       return "BACK";
     } else if (c == 13 || c == 10) { // enter
@@ -748,6 +765,7 @@ CompressionResult CLI::processImage() {
 }
 
 CompressionResult CLI::run() {
+  std::signal(SIGINT, sigintHandler);
   clearVisibleScreen();
   printTitle("QuadTree Image Compression");
 
