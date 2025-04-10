@@ -43,6 +43,7 @@
 // Terminal effects
 inline const std::string CLEAR_SCREEN =
     "\033c"; // Only clear the shown screen (not really)
+inline const std::string FULL_CLEAR_SCREEN = "\033[2J\033[3J\033[H";
 inline const std::string SOUND = "\a";
 
 // Cursor manipulation
@@ -108,4 +109,3 @@ inline const std::string BG_BRIGHT_CYAN = "\033[106m";
 inline const std::string BG_BRIGHT_WHITE = "\033[107m";
 
 #endif // STYLE_H
-
