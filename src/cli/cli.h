@@ -46,6 +46,7 @@ private:
   void setupTerminal();
   void resetTerminal();
   void clearScreen();
+  void clearVisibleScreen();
   void clearLine();
   std::string doubleToString(double value, int precision);
   void moveCursorUp(int lines);

@@ -51,10 +51,11 @@ void CLI::setupTerminal() {
   GetConsoleMode(hStdout, &mode);
   SetConsoleMode(hStdout, mode | ENABLE_VIRTUAL_TERMINAL_PROCESSING);
 
-  // set input mode for arrow keys
-  SetConsoleMode(hStdin, ENABLE_EXTENDED_FLAGS |
-		  (oldConsoleMode & ~ENABLE_QUICK_EDIT_MODE));
-
+  DWORD inMode = 0;
+  GetConsoleMode(hStdin, &inMode);
+  // Set the mode to include processed input but disable Quick Edit if needed.
+  SetConsoleMode(hStdin, ENABLE_PROCESSED_INPUT | ENABLE_EXTENDED_FLAGS |
+                             (inMode & ~ENABLE_QUICK_EDIT_MODE));
 #else
   // unix terminal setup
   struct termios newTermios;
@@ -77,7 +78,8 @@ void CLI::resetTerminal() {
   std::cout << "\033[?25h" << std::flush;
 }
 
-void CLI::clearScreen() { std::cout << "\033[2J\033[H" << std::flush; }
+void CLI::clearScreen() { std::cout << FULL_CLEAR_SCREEN << std::flush; }
+void CLI::clearVisibleScreen() { std::cout << CLEAR_SCREEN << std::flush; }
 
 void CLI::clearLine() { std::cout << "\r\033[K" << std::flush; }
 
@@ -154,6 +156,7 @@ int CLI::getCharWithTimeout(int timeout_ms) {
 
 int CLI::handleArrowKeys() {
 #ifdef _WIN32
+<<<<<<< HEAD
 	char c = getChar();
 	switch (c) {
 		case 72:
@@ -167,6 +170,27 @@ int CLI::handleArrowKeys() {
 		default:
 			return c;
 	}
+=======
+  char c = getChar();
+  std::cout << "TATANG: " << c << endl;
+  if (c == 0 || c == 224) { // arrow keys prefix
+    char d = getChar();
+    std::cout << "TATANG: " << d << endl;
+    switch (d) {
+    case 72:
+      return 1; // up
+    case 80:
+      return 2; // down
+    case 75:
+      return 3; // left
+    case 77:
+      return 4; // right
+    default:
+      return 0;
+    }
+  }
+  return c;
+>>>>>>> 09a94af891a59b73327923e81fa2aeac178f4381
 #else
   char c = getChar();
   if (c == 27) { // ESC key detected
@@ -311,6 +335,11 @@ std::string CLI::getFilePath(const std::string &prompt,
     printPrompt(prompt, isError);
     std::vector<std::pair<std::string, std::string>> keybinds = {
         {"ENTER", "confirm"}};
+
+    // im just lazy to differentiate file input and output
+    if (!mustExist) {
+      keybinds.push_back({"ESCAPE", "back"});
+    }
     std::cout << "\n";
     clearLine();
     std::cout << "\n";
@@ -343,7 +372,9 @@ std::string CLI::getFilePath(const std::string &prompt,
       clearLine();
 
       moveCursorUp(4 + isError);
-      continue;
+      if (mustExist)
+        continue;
+      return "BACK";
     }
 
     // check existence or directory validity
@@ -739,7 +770,7 @@ CompressionResult CLI::processImage() {
 }
 
 CompressionResult CLI::run() {
-  clearScreen();
+  clearVisibleScreen();
   printTitle("QuadTree Image Compression");
 
   if (state.currentInputStep == 0) {
@@ -974,6 +1005,6 @@ CompressionResult CLI::run() {
   std::cout << "  Press any key to exit..." << std::flush;
   getChar();
 
-  clearScreen();
+  clearVisibleScreen();
   return result;
 }
