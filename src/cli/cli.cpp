@@ -587,7 +587,7 @@ T CLI::selectOption(const std::string &prompt,
     if (key == -2) {
       // call the SIGINT handler directly
       sigintHandler(SIGINT);
-      return 0;          // this line won't be reached if sigintHandler exits
+      return 0; // this line won't be reached if sigintHandler exits
     } else if (key == 1) {
       if (selected > 0)
         selected--;
@@ -775,10 +775,10 @@ CompressionResult CLI::run() {
   printTitle("QuadTree Image Compression");
 
   if (state.currentInputStep == 0) {
-    std::string filePath = getFilePath(
-        "Enter input image file path", "Path could be absolute or relative",
-        "path/to/image.jpg", true, false,
-        {".jpeg", ".png", ".jpg", ".bmp", ".hdr", ".tga"});
+    std::string filePath =
+        getFilePath("Enter input image file path",
+                    "Path could be absolute or relative", "path/to/image.jpg",
+                    true, false, {".jpeg", ".png", ".jpg", ".bmp", ".tga"});
     state.inputFilePath = filePath;
     compression.setInputPath(filePath);
     inputPromptHistory.push_back("Input image: " + compression.getInputPath());
