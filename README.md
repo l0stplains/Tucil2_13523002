@@ -1,8 +1,8 @@
 > Tugas Kecil 2 - IF2211 Strategi Algoritma 2025
 
-<h3 align="center">Quadtree Image Compression</h3>
+<h3 align="center">Quadtree Image Compressor</h3>
 <p align="center">
-    Quadtree Image Compression is a <i> blazingly fast </i> C++ tools for compressing image.
+    Quadtree Image Compressor is a <i> blazingly fast </i> C++ tools for compressing image.
     <br />
     <br />
     <a href="https://github.com/l0stplains/Tucil2_13523002/releases/">Releases</a>
@@ -13,7 +13,7 @@
 ## Project Overview
 
 <p align="justify">
-Quadtree Image Compression is a  <i> blazingly fast </i> C++ tool designed to compress images by utilizing the quadtree data structure and divide and conquer algorithm by dividing them into smaller blocks based on color homogeneity.
+Quadtree Image Compressor is a  <i> blazingly fast </i> C++ tool designed to compress images by utilizing the quadtree data structure and divide and conquer algorithm by dividing them into smaller blocks based on color homogeneity.
 </p>
 
 <p align="justify">
