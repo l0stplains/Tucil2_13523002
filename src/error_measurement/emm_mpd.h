@@ -1,6 +1,5 @@
 #ifndef EMM_MPD_H
 #define EMM_MPD_H
-#define NOMINMAX
 
 #include "error_method.h"
 #include <algorithm>

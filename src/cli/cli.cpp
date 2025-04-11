@@ -584,7 +584,11 @@ T CLI::selectOption(const std::string &prompt,
 
     int key = handleArrowKeys();
 
-    if (key == 1) {
+    if (key == -2) {
+      // call the SIGINT handler directly
+      sigintHandler(SIGINT);
+      return 0;          // this line won't be reached if sigintHandler exits
+    } else if (key == 1) {
       if (selected > 0)
         selected--;
       moveCursorUp(options.size() + 2);
