@@ -36,7 +36,6 @@ Thumbs.db
 *.so
 *.dll
 *.dylib
-*.exe
 
 # Test output and coverage files
 coverage/
