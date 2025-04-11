@@ -58,6 +58,7 @@ bool CompressionController::setTargetCompression(double target) {
 }
 bool CompressionController::setOutputPath(std::string path) {
   fs::path filePath(path);
+  filePath = fs::absolute(filePath);
   std::string ext = filePath.extension().string();
 
   std::transform(ext.begin(), ext.end(), ext.begin(),
@@ -71,6 +72,11 @@ bool CompressionController::setOutputPath(std::string path) {
 }
 bool CompressionController::setGifOutputPath(std::string path) {
   fs::path filePath(path);
+  if (filePath.empty()) {
+    mGifOutputPath = "";
+    return true;
+  }
+  filePath = fs::absolute(filePath);
   std::string ext = filePath.extension().string();
 
   std::transform(ext.begin(), ext.end(), ext.begin(),

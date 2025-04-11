@@ -14,16 +14,15 @@
 #include <sstream>
 
 #include <condition_variable>
-#include <string>
 #include <csignal>
 #include <cstdlib>
+#include <string>
 
 // handle SIGINT
 void sigintHandler(int signum) {
   std::cout << CLEAR_SCREEN << "Interrupt received. Exiting...\n";
   std::exit(signum);
 }
-
 
 std::condition_variable spinnerCv;
 std::mutex spinnerCvMutex;
@@ -65,7 +64,8 @@ void CLI::setupTerminal() {
   GetConsoleMode(hStdin, &inMode);
   // Make sure ENABLE_PROCESSED_INPUT is set to process CTRL+C
   // and ENABLE_QUICK_EDIT_MODE is disabled
-  SetConsoleMode(hStdin, (inMode | ENABLE_PROCESSED_INPUT) & ~ENABLE_QUICK_EDIT_MODE);
+  SetConsoleMode(hStdin,
+                 (inMode | ENABLE_PROCESSED_INPUT) & ~ENABLE_QUICK_EDIT_MODE);
 #else
   // unix terminal setup
   struct termios newTermios;
@@ -167,8 +167,8 @@ int CLI::getCharWithTimeout(int timeout_ms) {
 int CLI::handleArrowKeys() {
 #ifdef _WIN32
   char c = getChar();
-    if (c == 3) {
-    return -2; 
+  if (c == 3) {
+    return -2;
   }
   switch (c) {
   case 72:
@@ -224,7 +224,7 @@ std::string CLI::readInput(const std::string &placeholder) {
     if (c == -2) {
       // call the SIGINT handler directly
       sigintHandler(SIGINT);
-      return ""; // this line won't be reached if sigintHandler exits
+      return "";          // this line won't be reached if sigintHandler exits
     } else if (c == 27) { // ESC
       goToPreviousInput();
       return "BACK";
@@ -235,7 +235,8 @@ std::string CLI::readInput(const std::string &placeholder) {
       if (!input.empty()) {
         input.pop_back();
         clearLine();
-        std::cout << "  > " << input;
+
+        std::cout << BRIGHT_MAGENTA << "  > " << RESET << input;
         if (input.empty() && !placeholder.empty()) {
           std::cout << BRIGHT_BLACK << placeholder << RESET;
           firstDraw = true;
@@ -247,7 +248,7 @@ std::string CLI::readInput(const std::string &placeholder) {
       // clear placeholder if this is the first character
       if (input.empty() && firstDraw && !placeholder.empty()) {
         clearLine();
-        std::cout << "  > ";
+        std::cout << BRIGHT_MAGENTA << "  > " << RESET;
         firstDraw = false;
       }
       input += static_cast<char>(c);
@@ -347,7 +348,7 @@ std::string CLI::getFilePath(const std::string &prompt,
     printHint(description);
 
     clearLine();
-    std::cout << "  > ";
+    std::cout << BRIGHT_MAGENTA << "  > " << RESET;
     std::string path = readInput(placeholder);
 
     if (path.empty()) {
@@ -453,7 +454,7 @@ double CLI::getNumberInput(const std::string &prompt,
     moveCursorUp(4);
 
     printHint(description);
-    std::cout << "  > ";
+    std::cout << BRIGHT_MAGENTA << "  > " << RESET;
     std::string input = readInput(placeholder);
 
     if (input == "BACK") {
@@ -508,7 +509,7 @@ int CLI::getIntInput(const std::string &prompt, const std::string &description,
     moveCursorUp(4);
 
     printHint(description);
-    std::cout << "  > ";
+    std::cout << BRIGHT_MAGENTA << "  > " << RESET;
     std::string input = readInput(placeholder);
 
     if (input == "BACK") {
@@ -562,9 +563,9 @@ T CLI::selectOption(const std::string &prompt,
     for (size_t i = 0; i < options.size(); i++) {
       clearLine();
       if (i == selected) {
-        std::cout << "  " << MAGENTA << "> " << RESET << BOLD
-                  << options[i].second << ". " << options[i].first << RESET
-                  << std::endl;
+        std::cout << "  " << BRIGHT_MAGENTA << "> " << RESET << BOLD
+                  << BRIGHT_GREEN << options[i].second << ". "
+                  << options[i].first << RESET << std::endl;
       } else {
         std::cout << "    " << options[i].second << ". " << options[i].first
                   << std::endl;
@@ -770,14 +771,13 @@ CompressionResult CLI::run() {
   printTitle("QuadTree Image Compression");
 
   if (state.currentInputStep == 0) {
-    std::string filePath =
-        getFilePath("Enter input image file path",
-                    "Supported file extension is .jpeg, .png, .bmp, .hdr, .tga",
-                    "path/to/image.jpg", true, false,
-                    {".jpeg", ".png", ".jpg", ".bmp", ".hdr", ".tga"});
+    std::string filePath = getFilePath(
+        "Enter input image file path", "Path could be absolute or relative",
+        "path/to/image.jpg", true, false,
+        {".jpeg", ".png", ".jpg", ".bmp", ".hdr", ".tga"});
     state.inputFilePath = filePath;
     compression.setInputPath(filePath);
-    inputPromptHistory.push_back("Input image: " + state.inputFilePath);
+    inputPromptHistory.push_back("Input image: " + compression.getInputPath());
     state.currentInputStep++;
   }
 
@@ -849,7 +849,9 @@ CompressionResult CLI::run() {
     printPreviousInputs();
 
     int blockSize =
-        getIntInput("Enter minimum block size (pixels²)", "", 1, INT_MAX, "");
+        getIntInput("Enter minimum block size (pixels²)",
+                    "Block size is in range 1-INT_MAX (image not loaded yet)",
+                    1, INT_MAX, "");
     if (blockSize < 0)
       return run();
 
@@ -897,7 +899,7 @@ CompressionResult CLI::run() {
     if (!compression.setOutputPath(outputPath)) {
       std::cerr << "OUTPUTPATH WRONG " << std::endl;
     }
-    inputPromptHistory.push_back("Output file: " + state.outputFilePath);
+    inputPromptHistory.push_back("Output file: " + compression.getOutputPath());
     state.currentInputStep++;
   }
 
@@ -918,7 +920,8 @@ CompressionResult CLI::run() {
     if (gifPath.empty()) {
       inputPromptHistory.push_back("GIF visualization: None");
     } else {
-      inputPromptHistory.push_back("GIF visualization: " + state.gifOutputPath);
+      inputPromptHistory.push_back("GIF visualization: " +
+                                   compression.getGifOutputPath());
     }
     state.currentInputStep++;
   }
@@ -998,9 +1001,5 @@ CompressionResult CLI::run() {
   std::cout << GREEN << "  Compression completed successfully!" << RESET
             << std::endl;
   std::cout << std::endl;
-  std::cout << "  Press any key to exit..." << std::flush;
-  getChar();
-
-  clearVisibleScreen();
   return result;
 }
