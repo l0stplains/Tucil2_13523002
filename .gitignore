@@ -43,6 +43,3 @@ coverage/
 *.gcov
 *.gcda
 *.gcno
-
-# Development tools:
-build.sh
